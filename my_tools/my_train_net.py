@@ -16,6 +16,7 @@ You may want to write your own script with your datasets and other customization
 """
 
 import logging
+from multiprocessing import Event
 import os
 from collections import OrderedDict
 import torch
@@ -38,7 +39,7 @@ from detectron2.modeling import GeneralizedRCNNWithTTA
 from detectron2.utils.logger import setup_logger
 
 from adet.data.dataset_mapper import DatasetMapperWithBasis
-from adet.data.fcpose_dataset_mapper import FCPoseDatasetMapper
+#from adet.data.fcpose_dataset_mapper import FCPoseDatasetMapper
 from adet.config import get_cfg
 from adet.checkpoint import AdetCheckpointer
 #from adet.evaluation import TextEvaluator
@@ -51,52 +52,67 @@ class Trainer(DefaultTrainer):
     `build_train_loader`/`resume_or_load` method.
     """
     def build_hooks(self):
-        """
-        Replace `DetectionCheckpointer` with `AdetCheckpointer`.
 
-        Build a list of default hooks, including timing, evaluation,
-        checkpointing, lr scheduling, precise BN, writing events.
-        """
+        # calls hooks for training, these can either be modified or added to
         ret = super().build_hooks()
         for i in range(len(ret)):
+            # Find the periodic Checkpoint hook in returned hooks list
             if isinstance(ret[i], hooks.PeriodicCheckpointer):
+
+                # modify the defualt trainer checkpoint to add AdelaiDet checkpoint handler
                 self.checkpointer = AdetCheckpointer(
                     self.model,
                     self.cfg.OUTPUT_DIR,
                     optimizer=self.optimizer,
                     scheduler=self.scheduler,
                 )
+
+                # add modification to hooks list
                 ret[i] = hooks.PeriodicCheckpointer(self.checkpointer, self.cfg.SOLVER.CHECKPOINT_PERIOD)
-        return ret
+
+            # return hooks with modifications
+            return ret
     
+    # Modify the resume_or_load function to use the AdelaiDet checkpointer
     def resume_or_load(self, resume=True):
+
+        # define checkpoint
         checkpoint = self.checkpointer.resume_or_load(self.cfg.MODEL.WEIGHTS, resume=resume)
+        
+        # define action to be taken in instance of resume and last checkpoint
         if resume and self.checkpointer.has_checkpoint():
             self.start_iter = checkpoint.get("iteration", -1) + 1
 
+    # manages the training loop
     def train_loop(self, start_iter: int, max_iter: int):
-        """
-        Args:
-            start_iter, max_iter (int): See docs above
-        """
+        
+        # gets log got adet training and log starting itteration infor in log
         logger = logging.getLogger("adet.trainer")
         logger.info("Starting training from iteration {}".format(start_iter))
 
+        # set itter and start itter for this itteration then set max itterations
         self.iter = self.start_iter = start_iter
         self.max_iter = max_iter
 
+        # event storage is a detectron2 utility that handles data strage durin the training proces
         with EventStorage(start_iter) as self.storage:
-            self.before_train()
+            
+            # handles tasks before storage
+            self.before_train()                             
+
+            # loops through iteration and handles tasks, before and after each step along with running step
             for self.iter in range(start_iter, max_iter):
                 self.before_step()
                 self.run_step()
                 self.after_step()
+
+            # function handles tasks after step
             self.after_train()
 
+    # function is called to train the the model and calls the training loop within it
     def train(self):
         """
         Run training.
-
         Returns:
             OrderedDict of results, if evaluation is enabled. Otherwise None.
         """
@@ -114,10 +130,12 @@ class Trainer(DefaultTrainer):
         It calls :func:`detectron2.data.build_detection_train_loader` with a customized
         DatasetMapper, which adds categorical labels as a semantic mask.
         """
-        if cfg.MODEL.FCPOSE_ON:
-            mapper = FCPoseDatasetMapper(cfg, True)
-        else:
-            mapper = DatasetMapperWithBasis(cfg, True)
+        #if cfg.MODEL.FCPOSE_ON:
+        #    mapper = FCPoseDatasetMapper(cfg, True)
+        #else:
+
+        # mapper should be this, above removed because it should not be needed
+        mapper = DatasetMapperWithBasis(cfg, True)
         return build_detection_train_loader(cfg, mapper=mapper)
 
     @classmethod
@@ -128,10 +146,16 @@ class Trainer(DefaultTrainer):
         For your own dataset, you can simply create an evaluator manually in your
         script and do not have to worry about the hacky if-else logic here.
         """
+        
+        # make output dir if it doesnt exist and add inference
         if output_folder is None:
             output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
+
+        # initialise evaluator list and get type
         evaluator_list = []
         evaluator_type = MetadataCatalog.get(dataset_name).evaluator_type
+        
+        # assinging evaluator type based on methond of segmentation (think its coco but not sure?)
         if evaluator_type in ["sem_seg", "coco_panoptic_seg"]:
             evaluator_list.append(
                 SemSegEvaluator(
@@ -142,16 +166,22 @@ class Trainer(DefaultTrainer):
                     output_dir=output_folder,
                 )
             )
+
+        # think this one is relevant to coco
         if evaluator_type in ["coco", "coco_panoptic_seg"]:
             evaluator_list.append(COCOEvaluator(dataset_name, cfg, True, output_folder))
-        if evaluator_type == "coco_panoptic_seg":
-            evaluator_list.append(COCOPanopticEvaluator(dataset_name, output_folder))
-        if evaluator_type == "pascal_voc":
-            return PascalVOCDetectionEvaluator(dataset_name)
-        if evaluator_type == "lvis":
-            return LVISEvaluator(dataset_name, cfg, True, output_folder)
-        if evaluator_type == "text":
-            return TextEvaluator(dataset_name, cfg, True, output_folder)
+
+        # commented out as should not be applicable to solov2?
+        #if evaluator_type == "coco_panoptic_seg":
+        #    evaluator_list.append(COCOPanopticEvaluator(dataset_name, output_folder))
+        #if evaluator_type == "pascal_voc":
+        #    return PascalVOCDetectionEvaluator(dataset_name)
+        #if evaluator_type == "lvis":
+        #    return LVISEvaluator(dataset_name, cfg, True, output_folder)
+        #if evaluator_type == "text":
+        #    return TextEvaluator(dataset_name, cfg, True, output_folder)
+
+        # check evalustor list and raise error if list not present
         if len(evaluator_list) == 0:
             raise NotImplementedError(
                 "no Evaluator for the dataset {} with the type {}".format(
@@ -160,8 +190,10 @@ class Trainer(DefaultTrainer):
             )
         if len(evaluator_list) == 1:
             return evaluator_list[0]
+
         return DatasetEvaluators(evaluator_list)
 
+    # this whole thing may not be relevent to solov2
     @classmethod
     def test_with_TTA(cls, cfg, model):
         logger = logging.getLogger("adet.trainer")
@@ -179,7 +211,6 @@ class Trainer(DefaultTrainer):
         res = OrderedDict({k + "_TTA": v for k, v in res.items()})
         return res
 
-
 def setup(args):
     """
     Create configs and perform basic setups.
@@ -195,16 +226,15 @@ def setup(args):
 
     return cfg
 
-
 def main(args):
 
     training_config_dict = {
-    "train1": ["coco", "test_train", "my_datasets/real_view_set/real_view_set.json", "my_datasets/real_view_set"],
-    #"train2": ["coco", "test_train2", "Data/train2/mod_init_jr_3.json", "Data/train2"]
+        "train1": ["coco", "test_train", "my_datasets/real_view_set/real_view_set.json", "my_datasets/real_view_set"],
+        #"train2": ["coco", "test_train2", "Data/train2/mod_init_jr_3.json", "Data/train2"]
     }
     testing_config_dict = {
         "test1": ["coco", "test_val", "my_datasets/initial_set/initial_jersey_royals.json", "my_datasets/initial_set"],
-    #    "test2": ["coco", "test_val", "Data/val2/init_jr_test.json", "Data/val2"]
+        #"test2": ["coco", "test_val", "Data/val2/init_jr_test.json", "Data/val2"]
     }
     thing_classes = ["Jersey Royal"]
 
