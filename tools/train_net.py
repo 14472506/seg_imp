@@ -41,7 +41,7 @@ from adet.data.dataset_mapper import DatasetMapperWithBasis
 from adet.data.fcpose_dataset_mapper import FCPoseDatasetMapper
 from adet.config import get_cfg
 from adet.checkpoint import AdetCheckpointer
-from adet.evaluation import TextEvaluator
+#from adet.evaluation import TextEvaluator
 
 from my_tools import custom_data_loader
 
@@ -199,20 +199,24 @@ def setup(args):
 def main(args):
 
     training_config_dict = {
-    "train1": ["vgg", "train1", "Data/train/potato_d2_dataset.json", "Data/train"],
-    "train2": ["coco", "train2", "Data/train2/mod_init_jr_3.json", "Data/train2"]
+    "train1": ["vgg", "test_train2", "Data/train/potato_d2_dataset.json", "Data/train"],
+    "train2": ["coco", "test_train", "Data/train2/mod_init_jr_3.json", "Data/train2"]
     }
     testing_config_dict = {
-        "test1": ["vgg", "test1", "Data/val/potato_d2_dataset.json", "Data/val"],
-        "test2": ["coco", "test2", "Data/val2/init_jr_test.json", "Data/val2"]
+        "test1": ["vgg", "test_val2", "Data/val/potato_d2_dataset.json", "Data/val"],
+        "test2": ["coco", "test_val", "Data/val2/init_jr_test.json", "Data/val2"]
     }
     thing_classes = ["Jersey Royal", "Handle Bar"]
 
     train_data = training_config_dict["train2"]
     training_meta = custom_data_loader(train_data[0], train_data[1], train_data[2], train_data[3], thing_classes)
-
-    test_data = testing_config_dict["train2"]
+    train_data = training_config_dict["train1"]
     training_meta = custom_data_loader(train_data[0], train_data[1], train_data[2], train_data[3], thing_classes)
+
+    test_data = testing_config_dict["test2"]
+    test_meta = custom_data_loader(test_data[0], test_data[1], test_data[2], test_data[3], thing_classes)
+    test_data = testing_config_dict["test1"]
+    test_meta = custom_data_loader(test_data[0], test_data[1], test_data[2], test_data[3], thing_classes)
 
     cfg = setup(args)
 
