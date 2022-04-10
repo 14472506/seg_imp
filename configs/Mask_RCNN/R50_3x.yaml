@@ -1,8 +1,9 @@
-_BASE_: "Base-SOLOv2.yaml"
+_BASE_: "Base-Mask_RCNN.yaml"
 MODEL:
   WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+  MASK_ON: True
   RESNETS:
     DEPTH: 50
 SOLVER:
-  STEPS: (2400,)
-  MAX_ITER: 1300
+  STEPS: (210000, 250000)
+  MAX_ITER: 270000

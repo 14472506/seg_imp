@@ -1,3 +1,7 @@
 /my_datasets
 /build
 /AdelaiDet.egg-info
+/train_dir
+/Mask_RCNN/Data
+/captured_results
+/data

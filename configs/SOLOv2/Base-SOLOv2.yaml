@@ -8,15 +8,17 @@ MODEL:
   FPN:
     IN_FEATURES: ["res2", "res3", "res4", "res5"]
 DATASETS:
-  TRAIN: ("test_train",)
-  TEST: ("test_val",)
+  TRAIN: ("jr_train",)
+  TEST: ("jr_val",)
+TEST:
+  EVAL_PERIOD: 100
 SOLVER:
   IMS_PER_BATCH: 2
-  BASE_LR: 0.00025
+  BASE_LR: 0.0005
   WARMUP_FACTOR: 0.01
   WARMUP_ITERS: 100
-  STEPS: (60000,)
-  MAX_ITER: 3000
+  STEPS: (,)
+  MAX_ITER: 100
 INPUT:
   MIN_SIZE_TRAIN: (640, 672, 704, 736, 768, 800)
   MASK_FORMAT: "bitmask"
