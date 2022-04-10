@@ -23,7 +23,11 @@ import torch
 from torch.nn.parallel import DistributedDataParallel
 
 import detectron2.utils.comm as comm
+<<<<<<< HEAD
 from detectron2.data import MetadataCatalog, build_detection_train_loader, build_detection_test_loader
+=======
+from detectron2.data import MetadataCatalog, build_detection_train_loader
+>>>>>>> c72c4e65969b929c0295a5e4ef11f90e2f0bbf84
 from detectron2.engine import DefaultTrainer, default_argument_parser, default_setup, hooks, launch
 from detectron2.utils.events import EventStorage
 from detectron2.evaluation import (
@@ -45,7 +49,10 @@ from adet.checkpoint import AdetCheckpointer
 #from adet.evaluation import TextEvaluator
 
 from my_tools import custom_data_loader
+<<<<<<< HEAD
 from loss_eval_hook import LossEvalHook
+=======
+>>>>>>> c72c4e65969b929c0295a5e4ef11f90e2f0bbf84
 
 class Trainer(DefaultTrainer):
     """
@@ -56,6 +63,7 @@ class Trainer(DefaultTrainer):
 
         # calls hooks for training, these can either be modified or added to
         ret = super().build_hooks()
+<<<<<<< HEAD
         
         # inserting loss eval hook into hook list
         ret.insert(-1, LossEvalHook(
@@ -69,6 +77,8 @@ class Trainer(DefaultTrainer):
         ))
         
         # loop through and return all hooks
+=======
+>>>>>>> c72c4e65969b929c0295a5e4ef11f90e2f0bbf84
         for i in range(len(ret)):
             # Find the periodic Checkpoint hook in returned hooks list
             if isinstance(ret[i], hooks.PeriodicCheckpointer):
@@ -144,6 +154,14 @@ class Trainer(DefaultTrainer):
         It calls :func:`detectron2.data.build_detection_train_loader` with a customized
         DatasetMapper, which adds categorical labels as a semantic mask.
         """
+<<<<<<< HEAD
+=======
+        #if cfg.MODEL.FCPOSE_ON:
+        #    mapper = FCPoseDatasetMapper(cfg, True)
+        #else:
+
+        # mapper should be this, above removed because it should not be needed
+>>>>>>> c72c4e65969b929c0295a5e4ef11f90e2f0bbf84
         mapper = DatasetMapperWithBasis(cfg, True)
         return build_detection_train_loader(cfg, mapper=mapper)
 
@@ -238,11 +256,19 @@ def setup(args):
 def main(args):
 
     training_config_dict = {
+<<<<<<< HEAD
         "train1": ["coco", "jr_train", "data/jr_train_val/train/train.json", "data/jr_train_val/train"],
         #"train2": ["coco", "test_train2", "Data/train2/mod_init_jr_3.json", "Data/train2"]
     }
     testing_config_dict = {
         "test1": ["coco", "jr_val", "data/jr_train_val/val/val.json", "data/jr_train_val/val"],
+=======
+        "train1": ["coco", "test_train", "my_datasets/real_view_set/real_view_set.json", "my_datasets/real_view_set"],
+        #"train2": ["coco", "test_train2", "Data/train2/mod_init_jr_3.json", "Data/train2"]
+    }
+    testing_config_dict = {
+        "test1": ["coco", "test_val", "my_datasets/initial_set/initial_jersey_royals.json", "my_datasets/initial_set"],
+>>>>>>> c72c4e65969b929c0295a5e4ef11f90e2f0bbf84
         #"test2": ["coco", "test_val", "Data/val2/init_jr_test.json", "Data/val2"]
     }
     thing_classes = ["Jersey Royal"]
