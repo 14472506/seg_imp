@@ -28,15 +28,18 @@ from detectron2.data import MetadataCatalog, build_detection_train_loader
 
 from detectron2.engine import DefaultTrainer, default_argument_parser, default_setup, hooks, launch
 from detectron2.utils.events import EventStorage
-from detectron2.evaluation import (
-    COCOEvaluator,
-    COCOPanopticEvaluator,
-    DatasetEvaluators,
-    LVISEvaluator,
-    PascalVOCDetectionEvaluator,
-    SemSegEvaluator,
-    verify_results,
-)
+#from detectron2.evaluation import (
+#    COCOEvaluator,
+#    COCOPanopticEvaluator,
+#    DatasetEvaluators,
+#    LVISEvaluator,
+#    PascalVOCDetectionEvaluator,
+#    SemSegEvaluator,
+#    verify_results,
+#)
+
+from adet.evaluation import Custom_COCOEvaluator
+
 from detectron2.modeling import GeneralizedRCNNWithTTA
 from detectron2.utils.logger import setup_logger
 
@@ -170,47 +173,7 @@ class Trainer(DefaultTrainer):
         if output_folder is None:
             output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
 
-        # initialise evaluator list and get type
-        evaluator_list = []
-        evaluator_type = MetadataCatalog.get(dataset_name).evaluator_type
-        
-        # assinging evaluator type based on methond of segmentation (think its coco but not sure?)
-        if evaluator_type in ["sem_seg", "coco_panoptic_seg"]:
-            evaluator_list.append(
-                SemSegEvaluator(
-                    dataset_name,
-                    distributed=True,
-                    num_classes=cfg.MODEL.SEM_SEG_HEAD.NUM_CLASSES,
-                    ignore_label=cfg.MODEL.SEM_SEG_HEAD.IGNORE_VALUE,
-                    output_dir=output_folder,
-                )
-            )
-
-        # think this one is relevant to coco
-        if evaluator_type in ["coco", "coco_panoptic_seg"]:
-            evaluator_list.append(COCOEvaluator(dataset_name, cfg, True, output_folder))
-
-        # commented out as should not be applicable to solov2?
-        #if evaluator_type == "coco_panoptic_seg":
-        #    evaluator_list.append(COCOPanopticEvaluator(dataset_name, output_folder))
-        #if evaluator_type == "pascal_voc":
-        #    return PascalVOCDetectionEvaluator(dataset_name)
-        #if evaluator_type == "lvis":
-        #    return LVISEvaluator(dataset_name, cfg, True, output_folder)
-        #if evaluator_type == "text":
-        #    return TextEvaluator(dataset_name, cfg, True, output_folder)
-
-        # check evalustor list and raise error if list not present
-        if len(evaluator_list) == 0:
-            raise NotImplementedError(
-                "no Evaluator for the dataset {} with the type {}".format(
-                    dataset_name, evaluator_type
-                )
-            )
-        if len(evaluator_list) == 1:
-            return evaluator_list[0]
-
-        return DatasetEvaluators(evaluator_list)
+        return Custom_COCOEvaluator(dataset_name, cfg, True, output_folder, use_fast_impl=True)
 
     # this whole thing may not be relevent to solov2
     @classmethod
@@ -249,26 +212,15 @@ def main(args):
 
     training_config_dict = {
         "train1": ["coco", "jr_train", "data/jr_train_val/train/train.json", "data/jr_train_val/train"],
-        #"train2": ["coco", "test_train2", "Data/train2/mod_init_jr_3.json", "Data/train2"]
     }
     testing_config_dict = {
         "test1": ["coco", "jr_val", "data/jr_train_val/val/val.json", "data/jr_train_val/val"],
-        "train1": ["coco", "test_train", "my_datasets/real_view_set/real_view_set.json", "my_datasets/real_view_set"],
-        #"train2": ["coco", "test_train2", "Data/train2/mod_init_jr_3.json", "Data/train2"]
-    }
-    testing_config_dict = {
-        "test1": ["coco", "test_val", "my_datasets/initial_set/initial_jersey_royals.json", "my_datasets/initial_set"],
-        #"test2": ["coco", "test_val", "Data/val2/init_jr_test.json", "Data/val2"]
     }
     thing_classes = ["Jersey Royal"]
 
-    #train_data = training_config_dict["train2"]
-    #training_meta = custom_data_loader(train_data[0], train_data[1], train_data[2], train_data[3], thing_classes)
     train_data = training_config_dict["train1"]
     training_meta = custom_data_loader(train_data[0], train_data[1], train_data[2], train_data[3], thing_classes)
 
-    #test_data = testing_config_dict["test2"]
-    #test_meta = custom_data_loader(test_data[0], test_data[1], test_data[2], test_data[3], thing_classes)
     test_data = testing_config_dict["test1"]
     test_meta = custom_data_loader(test_data[0], test_data[1], test_data[2], test_data[3], thing_classes)
 

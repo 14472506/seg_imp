@@ -4,10 +4,6 @@ MODEL:
   RESNETS:
     DEPTH: 50
 SOLVER:
-<<<<<<< HEAD
   STEPS: (2400,)
   MAX_ITER: 1300
-=======
-  STEPS: (30000,)
-  MAX_ITER: 100
->>>>>>> c72c4e65969b929c0295a5e4ef11f90e2f0bbf84
+
