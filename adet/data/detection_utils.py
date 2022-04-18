@@ -22,32 +22,32 @@ def transform_instance_annotations(
         keypoint_hflip_indices=keypoint_hflip_indices,
     )
 
-    if "beziers" in annotation:
-        beziers = transform_beziers_annotations(annotation["beziers"], transforms)
-        annotation["beziers"] = beziers
+    #if "beziers" in annotation:
+    #    beziers = transform_beziers_annotations(annotation["beziers"], transforms)
+    #    annotation["beziers"] = beziers
     return annotation
 
 
-def transform_beziers_annotations(beziers, transforms):
-    """
-    Transform keypoint annotations of an image.
-
-    Args:
-        beziers (list[float]): Nx16 float in Detectron2 Dataset format.
-        transforms (TransformList):
-    """
-    # (N*2,) -> (N, 2)
-    beziers = np.asarray(beziers, dtype="float64").reshape(-1, 2)
-    beziers = transforms.apply_coords(beziers).reshape(-1)
-
-    # This assumes that HorizFlipTransform is the only one that does flip
-    do_hflip = (
-        sum(isinstance(t, T.HFlipTransform) for t in transforms.transforms) % 2 == 1
-    )
-    if do_hflip:
-        raise ValueError("Flipping text data is not supported (also disencouraged).")
-
-    return beziers
+#def transform_beziers_annotations(beziers, transforms):
+#    """
+#    Transform keypoint annotations of an image.
+#
+#    Args:
+#        beziers (list[float]): Nx16 float in Detectron2 Dataset format.
+#        transforms (TransformList):
+#    """
+#    # (N*2,) -> (N, 2)
+#    beziers = np.asarray(beziers, dtype="float64").reshape(-1, 2)
+#    beziers = transforms.apply_coords(beziers).reshape(-1)
+#
+#    # This assumes that HorizFlipTransform is the only one that does flip
+#    do_hflip = (
+#        sum(isinstance(t, T.HFlipTransform) for t in transforms.transforms) % 2 == 1
+#    )
+#    if do_hflip:
+#        raise ValueError("Flipping text data is not supported (also disencouraged).")
+#
+#    return beziers
 
 
 def annotations_to_instances(annos, image_size, mask_format="polygon"):
@@ -57,9 +57,9 @@ def annotations_to_instances(annos, image_size, mask_format="polygon"):
         return instance
 
     # add attributes
-    if "beziers" in annos[0]:
-        beziers = [obj.get("beziers", []) for obj in annos]
-        instance.beziers = torch.as_tensor(beziers, dtype=torch.float32)
+    #if "beziers" in annos[0]:
+    #    beziers = [obj.get("beziers", []) for obj in annos]
+    #    instance.beziers = torch.as_tensor(beziers, dtype=torch.float32)
 
     if "rec" in annos[0]:
         text = [obj.get("rec", []) for obj in annos]

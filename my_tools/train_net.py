@@ -28,15 +28,15 @@ from detectron2.data import MetadataCatalog, build_detection_train_loader
 
 from detectron2.engine import DefaultTrainer, default_argument_parser, default_setup, hooks, launch
 from detectron2.utils.events import EventStorage
-#from detectron2.evaluation import (
+from detectron2.evaluation import (
 #    COCOEvaluator,
 #    COCOPanopticEvaluator,
 #    DatasetEvaluators,
 #    LVISEvaluator,
 #    PascalVOCDetectionEvaluator,
 #    SemSegEvaluator,
-#    verify_results,
-#)
+     verify_results,
+)
 
 from adet.evaluation import Custom_COCOEvaluator
 
@@ -176,22 +176,22 @@ class Trainer(DefaultTrainer):
         return Custom_COCOEvaluator(dataset_name, cfg, True, output_folder, use_fast_impl=True)
 
     # this whole thing may not be relevent to solov2
-    @classmethod
-    def test_with_TTA(cls, cfg, model):
-        logger = logging.getLogger("adet.trainer")
-        # In the end of training, run an evaluation with TTA
-        # Only support some R-CNN models.
-        logger.info("Running inference with test-time augmentation ...")
-        model = GeneralizedRCNNWithTTA(cfg, model)
-        evaluators = [
-            cls.build_evaluator(
-                cfg, name, output_folder=os.path.join(cfg.OUTPUT_DIR, "inference_TTA")
-            )
-            for name in cfg.DATASETS.TEST
-        ]
-        res = cls.test(cfg, model, evaluators)
-        res = OrderedDict({k + "_TTA": v for k, v in res.items()})
-        return res
+    #@classmethod
+    #def test_with_TTA(cls, cfg, model):
+    #    logger = logging.getLogger("adet.trainer")
+    #    # In the end of training, run an evaluation with TTA
+    #    # Only support some R-CNN models.
+    #    logger.info("Running inference with test-time augmentation ...")
+    #    model = GeneralizedRCNNWithTTA(cfg, model)
+    #    evaluators = [
+    #        cls.build_evaluator(
+    #            cfg, name, output_folder=os.path.join(cfg.OUTPUT_DIR, "inference_TTA")
+    #        )
+    #        for name in cfg.DATASETS.TEST
+    #    ]
+    #    res = cls.test(cfg, model, evaluators)
+    #    res = OrderedDict({k + "_TTA": v for k, v in res.items()})
+    #    return res
 
 def setup(args):
     """
