@@ -1,0 +1,11 @@
+_BASE_: "Base-Mask_RCNN.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+  MASK_ON: True
+  RESNETS:
+    DEPTH: 50
+SOLVER:
+  STEPS: (10000,)
+  MAX_ITER: 7450
+  BASE_LR: 0.01
+  CHECKPOINT_PERIOD: 75
