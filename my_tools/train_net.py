@@ -211,10 +211,11 @@ def setup(args):
 def main(args):
 
     training_config_dict = {
-        "train1": ["coco", "jr_train", "data/jr_train_val/train/train.json", "data/jr_train_val/train"],
+        "train1": ["coco", "jr_train", "data/jersey_royal_ds/train/train.json", "data/jersey_royal_ds/train"],
     }
     testing_config_dict = {
-        "test1": ["coco", "jr_val", "data/jr_train_val/val/val.json", "data/jr_train_val/val"],
+        "test1": ["coco", "jr_val", "data/jersey_royal_ds/val/val.json", "data/jersey_royal_ds/val"],
+        "test2": ["coco", "jr_test", "data/jersey_royal_ds/test/test.json", "data/jersey_royal_ds/test"]
     }
     thing_classes = ["Jersey Royal"]
 

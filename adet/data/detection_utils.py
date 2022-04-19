@@ -104,8 +104,6 @@ build_transform_gen = build_augmentation
 Alias for backward-compatibility.
 """
 
-
-
 class HeatmapGenerator():
     def __init__(self, num_joints, sigma, head_sigma):
         self.num_joints = num_joints
