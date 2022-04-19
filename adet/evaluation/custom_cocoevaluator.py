@@ -464,10 +464,10 @@ def _evaluate_box_proposals(dataset_predictions, coco_api, thresholds=None, area
     }
     area_ranges = [
         [0 ** 2, 1e5 ** 2],  # all
-        [0 ** 2, 32 ** 2],  # small
-        [32 ** 2, 96 ** 2],  # medium
-        [96 ** 2, 1e5 ** 2],  # large
-        [96 ** 2, 128 ** 2],  # 96-128
+        [0 ** 2, 42 ** 2],  # small
+        [32 ** 2, 99 ** 2],  # medium
+        [99 ** 2, 1e5 ** 2],  # large
+        [99 ** 2, 128 ** 2],  # 96-128 modified to 99
         [128 ** 2, 256 ** 2],  # 128-256
         [256 ** 2, 512 ** 2],  # 256-512
         [512 ** 2, 1e5 ** 2],
