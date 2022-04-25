@@ -173,7 +173,7 @@ class Trainer(DefaultTrainer):
         if output_folder is None:
             output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
 
-        return Custom_COCOEvaluator(dataset_name, cfg, True, output_folder, use_fast_impl=True)
+        return Custom_COCOEvaluator(dataset_name, cfg, True, output_folder, use_fast_impl=False)
 
     # this whole thing may not be relevent to solov2
     #@classmethod
@@ -215,14 +215,14 @@ def main(args):
     }
     testing_config_dict = {
         "test1": ["coco", "jr_val", "data/jersey_royal_ds/val/val.json", "data/jersey_royal_ds/val"],
-        "test2": ["coco", "jr_test", "data/jersey_royal_ds/test/test.json", "data/jersey_royal_ds/test"]
+        "test2": ["coco", "jr_val", "data/jersey_royal_ds/test/test.json", "data/jersey_royal_ds/test"]
     }
     thing_classes = ["Jersey Royal"]
 
     train_data = training_config_dict["train1"]
     training_meta = custom_data_loader(train_data[0], train_data[1], train_data[2], train_data[3], thing_classes)
 
-    test_data = testing_config_dict["test1"]
+    test_data = testing_config_dict["test2"]
     test_meta = custom_data_loader(test_data[0], test_data[1], test_data[2], test_data[3], thing_classes)
 
     test_data = testing_config_dict["test2"]

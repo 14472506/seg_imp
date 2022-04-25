@@ -589,7 +589,7 @@ def _evaluate_predictions_on_coco(
         ), "COCOeval requires maxDets (and max_dets_per_image) to have length at least 3"
         # In the case that user supplies a custom input for max_dets_per_image,
         # apply COCOevalMaxDets to evaluate AP with the custom input.
-        if max_dets_per_image[2] != 100:
+        if max_dets_per_image[2] != 100:  
             coco_eval = COCOevalMaxDets(coco_gt, coco_dt, iou_type)
     if iou_type != "keypoints":
         coco_eval.params.maxDets = max_dets_per_image

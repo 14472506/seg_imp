@@ -2,6 +2,7 @@
 /build
 /AdelaiDet.egg-info
 /train_dir
+/training_dir
 <<<<<<< HEAD
 /Mask_RCNN/Data
 /captured_results
