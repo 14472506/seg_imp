@@ -225,6 +225,9 @@ def main(args):
     test_data = testing_config_dict["test1"]
     test_meta = custom_data_loader(test_data[0], test_data[1], test_data[2], test_data[3], thing_classes)
 
+    test_data = testing_config_dict["test2"]
+    test_meta = custom_data_loader(test_data[0], test_data[1], test_data[2], test_data[3], thing_classes)
+
     cfg = setup(args)
 
     if args.eval_only:
